@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกเมนูอาหาร</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>บันทึกเมนูอาหาร</h2>
+        <label>น้ำหนัก (กก.):</label>
+        <input type="number" id="weight">
+        
+        <label>ส่วนสูง (ซม.):</label>
+        <input type="number" id="height">
+        
+        <label>อายุ:</label>
+        <input type="number" id="age">
+        
+        <label>เพศ:</label>
+        <select id="gender">
+            <option value="male">ชาย</option>
+            <option value="female">หญิง</option>
+        </select>
+        
+        <label>กิจกรรมออกกำลังกาย:</label>
+        <select id="activity">
+            <option value="1.2">ไม่ออกกำลังกาย</option>
+            <option value="1.375">เล็กน้อย (1-3 ครั้ง/สัปดาห์)</option>
+            <option value="1.55">ปานกลาง (3-5 ครั้ง/สัปดาห์)</option>
+            <option value="1.725">เยอะ (6-7 ครั้ง/สัปดาห์)</option>
+            <option value="1.9">ออกกำลังกายทุกวัน</option>
+        </select>
+        
+        <button onclick="calculateNeeds()">คำนวณพลังงานที่ต้องการ</button>
+        
+        <h3>พลังงานที่ต้องการ:</h3>
+        <p id="calories"></p>
+        <p id="carbs"></p>
+        
+        <h3>บันทึกอาหาร:</h3>
+        <label>เมนูอาหาร:</label>
+        <input type="text" id="food">
+        
+        <label>จำนวนทัพพี:</label>
+        <input type="number" id="serving">
+        
+        <label>อาหารว่าง:</label>
+        <input type="text" id="snack">
+        
+        <label>จำนวน:</label>
+        <input type="number" id="snackAmount">
+        
+        <button onclick="calculateIntake()">คำนวณปริมาณอาหาร</button>
+        
+        <h3>ผลลัพธ์:</h3>
+        <p id="consumedCalories"></p>
+        <p id="remainingCalories"></p>
+        
+        <canvas id="chart"></canvas>
+    </div>
+    
+    <script>
+        let dailyCalories = 0;
+        let dailyCarbs = 0;
+        
+        function calculateNeeds() {
+            let weight = document.getElementById('weight').value;
+            let height = document.getElementById('height').value;
+            let age = document.getElementById('age').value;
+            let gender = document.getElementById('gender').value;
+            let activity = document.getElementById('activity').value;
+            
+            let bmr = gender === 'male' 
+                ? (10 * weight) + (6.25 * height) - (5 * age) + 5 
+                : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            
+            dailyCalories = bmr * activity;
+            dailyCarbs = (dailyCalories * 0.5) / 4;
+            
+            document.getElementById('calories').innerText = พลังงานที่ต้องการ: ${dailyCalories.toFixed(2)} kcal;
+            document.getElementById('carbs').innerText = คาร์โบไฮเดรตที่ควรได้รับ: ${dailyCarbs.toFixed(2)} กรัม;
+        }
+        
+        function calculateIntake() {
+            let servings = document.getElementById('serving').value;
+            let snackAmount = document.getElementById('snackAmount').value;
+            
+            let consumedCalories = (servings * 200) + (snackAmount * 150);
+            let remainingCalories = dailyCalories - consumedCalories;
+            
+            document.getElementById('consumedCalories').innerText = แคลอรี่ที่กินไป: ${consumedCalories} kcal;
+            document.getElementById('remainingCalories').innerText = แคลอรี่ที่เหลือ: ${remainingCalories.toFixed(2)} kcal;
+            
+            drawChart(consumedCalories, remainingCalories);
+        }
+        
+        function drawChart(consumed, remaining) {
+            let ctx = document.getElementById('chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['กินไปแล้ว', 'เหลืออยู่'],
+                    datasets: [{
+                        data: [consumed, remaining],
+                        backgroundColor: ['#ff6384', '#36a2eb']
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
